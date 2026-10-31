@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import {SHAPES,createShape,randomSource,measureHand} from './shapes.js';
 import {waitForStartup} from './camera-startup.js';
-import {createMusicSky} from './music.js?v=music2';
+import {createMusicSky} from './music.js?v=github1';
 const $=s=>document.querySelector(s), clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const state={shape:'galaxy',palette:'aurora',count:innerWidth<800?8000:18000,spread:.12,spreadTarget:.12,rotationX:0,rotationY:0,hand:false,camera:'off',burst:0,morph:1};
 let renderer,scene,camera,field,geometry,material,currentPositions,fromPositions,targetPositions,handWorker,stream,workerBusy=false,lastFrame=0,lastVideoTime=-1,lastHandAt=0,cameraGeneration=0;
@@ -121,12 +121,12 @@ async function cameraOn(){
     await waitForStartup(video.play(),{signal:controller.signal,timeout:12000,code:'video-timeout'});
     $('#camera-placeholder').hidden=true;$('#camera-placeholder').style.display='none';
     progress('正在准备手势识别引擎…','ENGINE');
-    handWorker=new Worker(new URL('./hand-worker.js?v=20261031',import.meta.url));
+    handWorker=new Worker(new URL('./hand-worker.js?v=github1',import.meta.url));
     await waitForStartup(new Promise((resolve,reject)=>{
       handWorker.onerror=e=>reject(new Error(e.message||'worker-error'));
       handWorker.onmessage=({data})=>{if(data.type==='ready')resolve();else if(data.type==='error')reject(new Error(data.message));else if(data.type==='progress')progress(data.message,data.badge);};
       handWorker.postMessage({type:'init'});
-    }),{signal:controller.signal,timeout:60000,code:'model-timeout'});
+    }),{signal:controller.signal,timeout:180000,code:'model-timeout'});
     if(generation!==cameraGeneration)return;
     handWorker.onmessage=({data})=>{workerBusy=false;if(state.camera!=='on')return;if(data.type==='result')handResult(data.landmarks);else if(data.type==='error'){console.warn('Hand tracking stopped:',data.message);cameraOff();toast('识别暂时中断，已切回鼠标模式。可以重新开启手势。');}};
     handWorker.onerror=()=>{if(state.camera==='on'){cameraOff();toast('手势识别中断，已切回鼠标模式。');}};

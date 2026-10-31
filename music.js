@@ -53,7 +53,7 @@ export function createMusicSky({notify}){
     $('#music-seek').value=0;$('#music-seek').disabled=true;$('#music-time').textContent='0:00';$('#music-duration').textContent='—';
     status('正在读取音乐…');$('#music-play').disabled=true;$('#music-mini-play').disabled=true;
     try{
-      if(kind==='demo'){
+      if(kind==='demo'&&location.protocol!=='https:'){
         const abort=new AbortController();trackFetch=abort;
         const timer=setTimeout(()=>abort.abort(),15000);
         try{
